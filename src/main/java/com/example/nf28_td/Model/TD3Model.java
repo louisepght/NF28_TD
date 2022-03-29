@@ -1,13 +1,9 @@
 package com.example.nf28_td.Model;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
-import java.util.List;
+import java.util.Iterator;
 
 public class TD3Model {
     private final ObservableList<Group> groups;
@@ -32,6 +28,14 @@ public class TD3Model {
 
     public Group getGroup(){
         return groups.get(groups.size()-1);
+    }
+
+    public void addContactToGroup(Contact contactToAdd, Group group){
+        //trouver le groupe correspondant dans la observable list de groupe
+        Iterator<Group> it = groups.iterator();
+        while(it.hasNext()) {
+            if(it.next().getName() == group.getName()) it.next().addContact(contactToAdd);
+        }
     }
 
 }

@@ -2,8 +2,9 @@ package com.example.nf28_td.Controller;
 
 import com.example.nf28_td.Model.Contact;
 import com.example.nf28_td.Model.Country;
+import com.example.nf28_td.Model.Group;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,16 +12,11 @@ import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Control;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 
 
 public class ContactController {
-
     @FXML
     private TextField lastName, firstName, city;
 
@@ -36,15 +32,28 @@ public class ContactController {
     @FXML
     private RadioButton genderf;
 
+    @FXML
+    private GridPane contactPane;
+
+    @FXML
+    private Button addButton;
+
     private Map<String, Control> controls;
 
     public Contact editingContact;
+
+    public TD3Controller td3Controller;
 
     MapChangeListener<String, String> validateFunction;
 
     public ContactController() {
         editingContact = new Contact();
+
         controls = new LinkedHashMap<>();
+    }
+
+    public void setPaneVisibility(Boolean visibility){
+            contactPane.visibleProperty().set(visibility);
     }
 
     public void initialize() {
@@ -96,10 +105,7 @@ public class ContactController {
                 sexeGroup.selectToggle(genderf);
             }
         });
-
-
         editingContact.validationMessagesProperty().addListener(validateFunction);
-
     }
 
     private void addControls(Contact contact) {
@@ -113,5 +119,19 @@ public class ContactController {
     @FXML
     public void validate() {
         editingContact.validate();
+        //prendre le type du noeud selectionne et le mettre dans le bon groupe
+        System.out.println("validate");
+        Group group;
+        /*
+        td3Controller = new TD3Controller();
+        Object g = td3Controller.selectedItem.getValue();
+        if (g instanceof Contact)
+            group = (Group) td3Controller.selectedItem.getParent().getValue();
+        else
+            group = (Group) g;
+        */
+
+
     }
+
 }

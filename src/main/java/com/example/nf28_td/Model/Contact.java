@@ -56,6 +56,7 @@ public class Contact {
         if (testProperty.test(sprop))
             validationMessages.put(sprop.getName(), Property.valueOf(sprop.getName()).tooltip);
     }
+
     // Etudie la validité de chaque Property
     public boolean validate() {
         validationMessages.clear();
@@ -74,5 +75,6 @@ public class Contact {
     public String toString() {
         return lastNameProperty().get() + " " + firstNameProperty().get();
     }
+
 
 }

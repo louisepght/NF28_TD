@@ -26,12 +26,18 @@ public class Group {
         return contacts.get(1);
     }
 
-    public List<Contact> getListContact(){
+    public ObservableList<Contact> getListContact(){
         return contacts;
     }
 
     public StringProperty nameProperty(){
         return name;
     }
+
+    public void addContact(Contact contact){
+        contacts.add(contact);
+    }
+
+    public String toString(){ return name.getValue();}
 
 }

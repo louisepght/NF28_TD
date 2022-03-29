@@ -9,15 +9,13 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.collections.FXCollections;
+import javafx.util.Callback;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,15 +27,20 @@ public class TD3Controller {
     public Group newGroup;
     public TD3Model td3Model;
     public ListChangeListener<Group> listChangeListener;
-    //private final Image groupIcon = new Image(getClass().getResourceAsStream("group.png"));
+    public TreeItem<Object> selectedItem;
+    private Group groupToAddContact; //groupe dans lequel on va ajouter un contact
+    //private final Image groupIcon = new Image(getClass().getResourceAsStream("group.png")); //Imput stream must not be null
 
     @FXML
     private BorderPane TD3BorderPane;
 
     @FXML
+    private Button addButton;
+
+    //@FXML
     private TreeItem<Object> TD3TreeItem;
 
-    @FXML
+    //@FXML
     private TreeView<Object> tree;
 
 
@@ -51,18 +54,40 @@ public class TD3Controller {
         ContactControl cc = new ContactControl();
         contactControllerTD = cc.contactController;
         editingContact = cc.contactController.editingContact;
+        TreeItem<Object> TD3TreeItem = new TreeItem<Object>("fiche de contacts");
+        tree = new TreeView<Object>(TD3TreeItem);
+        //TD3BorderPane.getChildren().add(tree);
         try{
-           TD3BorderPane.setCenter(cc.root);
+            contactControllerTD.setPaneVisibility(false);
+            //TD3TreeItem = new TreeItem<Object>("Fiche de contacts");
+            TD3TreeItem.setValue("Fiche de contacts");
+            TD3BorderPane.setCenter(cc.root);
+            TD3BorderPane.setLeft(tree);
+
         }catch (Exception e){
             throw e;
         }
+
+        // rename group
         tree.setCellFactory(param -> new TextFieldTreeCellImpl());
+        tree.setEditable(true);
+        tree.setCellFactory(new Callback<TreeView<Object>,TreeCell<Object>>(){
+            @Override
+            public TreeCell<Object> call(TreeView<Object> p) {
+                return new TextFieldTreeCellImpl();
+            }
+        });
+
         //écoute de la liste de groupes
         makeBindings();
+
+
     }
+
 
     public void ajouter(){
         //ajouter un groupe a la liste des groupes dans le model
+
         newGroup = new Group("Nouveau groupe");
         td3Model.addGroup(newGroup);
         //TreeItem newItem = new TreeItem("Nouveau groupe");
@@ -74,18 +99,71 @@ public class TD3Controller {
     }
 
     private void makeBindings(){
-        td3Model.getGroups().addListener(new ListChangeListener<Group>() {
-            @Override
-            public void onChanged(Change<? extends Group> change) {
-                TreeItem<Object> newItem = new TreeItem<Object>(newGroup);
-                tree.getRoot().getChildren().add(newItem);
-                //TD3TreeItem.getChildren().add(newItem);
+        tree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+            System.out.println("dans selected item tree");
+            if (newValue == null)
+                return;
+            this.selectedItem = (TreeItem<Object>) newValue;
+            System.out.print(selectedItem.getValue());
+            Object g = selectedItem.getValue();
+            if (g instanceof Contact){
+                addButton.setDisable(true); // true : desactive, false: active
+                //ajout d'un contact
+                System.out.print("je suis dans une instance de contact");
+
+                groupToAddContact = (Group) selectedItem.getParent().getValue(); // si un contact est selectionne alors on prend le groupe parent
+                groupToAddContact.getListContact().addListener(new ListChangeListener<Contact>() {
+
+                    @Override
+                    public void onChanged(Change<? extends Contact> change) {
+                        TreeItem<Object> newContact = new TreeItem<Object>(change);
+                        selectedItem.getChildren().add(newContact);
+                    }
+                });
+            }
+                       else if (g instanceof Group){ //ajout d un contact
+
+                addButton.setDisable(true); // true : desactive, false: active
+
+                System.out.print("je suis dans une instance de groupe et jajoute un contact");
+
+                groupToAddContact = (Group) g; //si l objet selectionne est de type groupe, alors on reste sur groupe
+
+                //rendre visible le contactcontrol
+                contactControllerTD.setPaneVisibility(true);
+
+
+                groupToAddContact.getListContact().addListener(new ListChangeListener<Contact>() {
+
+                    @Override
+                    public void onChanged(Change<? extends Contact> change) {
+                        TreeItem<Object> newContact = new TreeItem<Object>(change);
+                        selectedItem.getChildren().add(newContact);
+                    }
+                });
+
+
+            }else {
+                addButton.setDisable(false); // true : desactive, false: active
+                System.out.print("je suis dans la racine et je cree un groupe ");
+                contactControllerTD.setPaneVisibility(false);
+                td3Model.getGroups().addListener(new ListChangeListener<Group>() {
+                    @Override
+                    public void onChanged(Change<? extends Group> change) {
+                        TreeItem<Object> newItem = new TreeItem<Object>(newGroup);
+                        tree.getRoot().getChildren().add(newItem);
+                    }
+                });
             }
         });
     }
 
-    private void addObservableList(Group group){
+    public TreeItem<Object> getSelectedItem(){
+        return selectedItem;
+    }
 
+    public void addContactToGroup(Contact contactToAdd){
+        td3Model.addContactToGroup(contactToAdd, groupToAddContact);
     }
 
     private static class TextFieldTreeCellImpl extends TreeCell<Object> {
@@ -153,6 +231,8 @@ public class TD3Controller {
             return getItem() == null ? "" : getItem().toString();
         }
     }
+
+
 
 
 }

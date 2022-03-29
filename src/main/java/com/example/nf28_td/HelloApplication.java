@@ -8,6 +8,8 @@ import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -15,10 +17,10 @@ import java.io.IOException;
 
 
 public class HelloApplication extends Application {
-
-
     public TD3Controller td3Controller;
     public ContactController contactController;
+    @FXML
+    public BorderPane TD3BorderPane;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -26,6 +28,9 @@ public class HelloApplication extends Application {
         contactController = new ContactController();
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("TD3.fxml"));
+
+
+
         Scene scene = new Scene(fxmlLoader.load(), Constant.WIDTH, Constant.HEIGHT);
 
         stage.setTitle("TD3");
