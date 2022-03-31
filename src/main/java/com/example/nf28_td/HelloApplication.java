@@ -29,8 +29,6 @@ public class HelloApplication extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("TD3.fxml"));
 
-
-
         Scene scene = new Scene(fxmlLoader.load(), Constant.WIDTH, Constant.HEIGHT);
 
         stage.setTitle("TD3");

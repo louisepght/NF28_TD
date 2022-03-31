@@ -1,5 +1,9 @@
 package com.example.nf28_td.Model;
+import java.util.Iterator;
 import java.util.function.Predicate;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -13,6 +17,7 @@ public class Contact {
     private final StringProperty country;
     private final StringProperty gender;
     private final ObservableMap<String, String> validationMessages;
+    private final BooleanProperty contactChanged;
 
     public Contact() {
         this.lastName = new SimpleStringProperty(this, Property.NAME.name(), "");
@@ -20,7 +25,12 @@ public class Contact {
         this.gender = new SimpleStringProperty(this, Constant.SEX, "M");
         this.city = new SimpleStringProperty(this, Property.CITY.name(), "");
         this.country = new SimpleStringProperty(this, Property.COUNTRY.name(), "");
+        this.contactChanged = new SimpleBooleanProperty();
         validationMessages = FXCollections.observableHashMap();
+    }
+
+    public BooleanProperty isValid(){
+        return contactChanged;
     }
     // Property non renseignée
     Predicate<StringProperty> testProperty = prop -> prop.get() == null || prop.get().trim().equals("");
@@ -49,6 +59,14 @@ public class Contact {
         return gender.get();
     }
 
+    public void reset(){
+        this.lastName.setValue("");
+        this.firstName.setValue("");
+        this.gender.setValue("");
+        this.country.setValue("");
+        this.city.setValue("");
+        this.contactChanged.setValue(false);
+    }
     /**
      * Validité d'une StringProperty : sprop
      */
@@ -64,6 +82,7 @@ public class Contact {
         validate(firstName);
         validate(city);
         validate(country);
+        contactChanged.setValue(validationMessages.isEmpty());
         return validationMessages.isEmpty();
     }
 
@@ -76,5 +95,15 @@ public class Contact {
         return lastNameProperty().get() + " " + firstNameProperty().get();
     }
 
+
+    public Contact clone(){
+        Contact newContact = new Contact();
+        newContact.firstNameProperty().set(this.firstNameProperty().getValue());
+        newContact.lastNameProperty().set(this.lastNameProperty().getValue());
+        newContact.cityProperty().set(this.cityProperty().getValue());
+        newContact.countryProperty().set(this.countryProperty().getValue());
+        newContact.genderProperty().set(this.genderProperty().get());
+        return newContact;
+    }
 
 }

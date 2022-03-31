@@ -35,7 +35,9 @@ public class Group {
     }
 
     public void addContact(Contact contact){
+        System.out.println("addContact");
         contacts.add(contact);
+        System.out.println(contacts);
     }
 
     public String toString(){ return name.getValue();}

@@ -16,10 +16,11 @@ public class TD3Model {
 
 
     public void addGroup(Group group){
+        System.out.println("Group : ");
+        System.out.println(group);
         groups.add(group);
-    }
-
-    public void addTreeView(){
+        System.out.println("Groups : ");
+        System.out.println(groups);
     }
 
     public ObservableList<Group> getGroups(){
@@ -34,8 +35,10 @@ public class TD3Model {
         //trouver le groupe correspondant dans la observable list de groupe
         Iterator<Group> it = groups.iterator();
         while(it.hasNext()) {
-            if(it.next().getName() == group.getName()) it.next().addContact(contactToAdd);
+            Group nextGroup = it.next();
+            if(nextGroup.getName() == group.getName()) nextGroup.addContact(contactToAdd);
         }
+        System.out.println(group.getListContact());
     }
 
 }

@@ -121,17 +121,6 @@ public class ContactController {
         editingContact.validate();
         //prendre le type du noeud selectionne et le mettre dans le bon groupe
         System.out.println("validate");
-        Group group;
-        /*
-        td3Controller = new TD3Controller();
-        Object g = td3Controller.selectedItem.getValue();
-        if (g instanceof Contact)
-            group = (Group) td3Controller.selectedItem.getParent().getValue();
-        else
-            group = (Group) g;
-        */
-
-
     }
 
 }

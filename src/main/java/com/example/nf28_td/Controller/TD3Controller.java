@@ -5,6 +5,8 @@ import com.example.nf28_td.HelloApplication;
 import com.example.nf28_td.Model.Contact;
 import com.example.nf28_td.Model.Group;
 import com.example.nf28_td.Model.TD3Model;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
@@ -24,6 +26,7 @@ public class TD3Controller {
     public ContactController contactControllerTD;
     private ContactControl contactControl;
     public Contact editingContact;
+    private Contact newContact;
     public Group newGroup;
     public TD3Model td3Model;
     public ListChangeListener<Group> listChangeListener;
@@ -77,86 +80,160 @@ public class TD3Controller {
                 return new TextFieldTreeCellImpl();
             }
         });
-
         //écoute de la liste de groupes
-        makeBindings();
-
-
+        treeListener();
+        grouplistListener();
+        editContactListener();
     }
 
 
     public void ajouter(){
-        //ajouter un groupe a la liste des groupes dans le model
-
-        newGroup = new Group("Nouveau groupe");
-        td3Model.addGroup(newGroup);
-        //TreeItem newItem = new TreeItem("Nouveau groupe");
-        //TD3TreeItem.getChildren().add(newItem);
+        System.out.println("ajouter");
+        if(tree.getSelectionModel().getSelectedItem() != null){
+            if(tree.getSelectionModel().getSelectedItem().getValue() == tree.getRoot().getValue()){
+                System.out.println("ajouter");
+                newGroup = new Group("Nouveau groupe");
+                td3Model.addGroup(newGroup);
+                newGroup.getListContact().addListener(new ListChangeListener<Contact>() {
+                    @Override
+                    public void onChanged(ListChangeListener.Change<? extends Contact> c) {
+                        //MyLogger.log("groupListListener() : Entrée");
+                        //MyLogger.log("groupListListener() - Taille : " + modele.getObsGroupList().size());
+                        while (c.next()) {
+                            if (c.wasAdded()) {
+                                for (Contact ct : c.getAddedSubList()) {
+                                    System.out.println("listener sur le groupe");
+                                    //treeAddChild(getGroupFromSelectedItem(), ct);
+                                    TreeItem<Object> contactItem = new TreeItem<Object>(ct);
+                                    getGroupFromSelectedItem().getChildren().add(contactItem);
+                                }
+                            }
+                            if (c.wasRemoved()) {
+                                for (Contact ct : c.getRemoved()) {
+                                    // treeRemoveChild(treeView.getRoot(), g);
+                                    //treeRemoveContact(getGroupFromSelectedItem(), ct);
+                                    // treeView.refresh();
+                                }
+                            } /*
+                             * if (c.wasUpdated()) { Group g = new Group(); treeUpdateGroup(g); }
+                             */
+                        }
+                    }
+                });
+            }
+        }
     }
 
     public void remove(){
-
     }
 
     private void makeBindings(){
+
+        treeListener();
+        grouplistListener();
+        editContactListener();
+    }
+
+    public void treeListener(){
         tree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-            System.out.println("dans selected item tree");
-            if (newValue == null)
-                return;
-            this.selectedItem = (TreeItem<Object>) newValue;
-            System.out.print(selectedItem.getValue());
+            if (newValue == null) return;
+            selectedItem = (TreeItem<Object>) newValue;
             Object g = selectedItem.getValue();
+            System.out.println(g);
             if (g instanceof Contact){
-                addButton.setDisable(true); // true : desactive, false: active
-                //ajout d'un contact
-                System.out.print("je suis dans une instance de contact");
-
-                groupToAddContact = (Group) selectedItem.getParent().getValue(); // si un contact est selectionne alors on prend le groupe parent
-                groupToAddContact.getListContact().addListener(new ListChangeListener<Contact>() {
-
-                    @Override
-                    public void onChanged(Change<? extends Contact> change) {
-                        TreeItem<Object> newContact = new TreeItem<Object>(change);
-                        selectedItem.getChildren().add(newContact);
-                    }
-                });
-            }
-                       else if (g instanceof Group){ //ajout d un contact
-
-                addButton.setDisable(true); // true : desactive, false: active
-
-                System.out.print("je suis dans une instance de groupe et jajoute un contact");
-
-                groupToAddContact = (Group) g; //si l objet selectionne est de type groupe, alors on reste sur groupe
-
-                //rendre visible le contactcontrol
+                //mode édition cloner contact copier le contact
+                //addButton.setDisable(true); // true : desactive, false: active
+            }else if(g instanceof Group){
+                //addButton.setDisable(true);
                 contactControllerTD.setPaneVisibility(true);
-
-
-                groupToAddContact.getListContact().addListener(new ListChangeListener<Contact>() {
-
-                    @Override
-                    public void onChanged(Change<? extends Contact> change) {
-                        TreeItem<Object> newContact = new TreeItem<Object>(change);
-                        selectedItem.getChildren().add(newContact);
-                    }
-                });
-
-
-            }else {
-                addButton.setDisable(false); // true : desactive, false: active
-                System.out.print("je suis dans la racine et je cree un groupe ");
+            }else{
+                System.out.print("je suis dans la racine \n");
+                //addButton.setDisable(false); // true : desactive, false: active
                 contactControllerTD.setPaneVisibility(false);
-                td3Model.getGroups().addListener(new ListChangeListener<Group>() {
-                    @Override
-                    public void onChanged(Change<? extends Group> change) {
-                        TreeItem<Object> newItem = new TreeItem<Object>(newGroup);
-                        tree.getRoot().getChildren().add(newItem);
-                    }
-                });
             }
         });
     }
+
+    public TreeItem<Object> getGroupFromSelectedItem(){
+        TreeItem<Object> newTreeItem = new TreeItem<>();
+        if(selectedItem.getValue() instanceof Group){
+            newTreeItem = selectedItem;
+        }else{
+            newTreeItem = selectedItem.getParent();
+        }
+        return  newTreeItem;
+    }
+
+    public void editContactListener(){
+        editingContact.isValid().addListener((obs,oldval,newval) -> {
+            if(newval.booleanValue()){
+                Contact contactval = editingContact.clone();
+                //vérifier qu'on est dans le bon groupe
+                for(Group grp : td3Model.getGroups()){
+                    if(grp == (Group) selectedItem.getValue()){
+                        System.out.println("ditcontactlistener");
+                        grp.addContact(contactval);
+                        System.out.println(grp.getListContact().toString());
+                    }
+                    /*
+                    * edition
+                        for(contact ct : grp.getcontacts(){
+                        * if(ct.isEqual(originalcontact)){
+                        * if(ct.isEqual(originalContact){ct.update(editingcontact)} //implementer update dans contact
+                    * */
+
+                }
+                editingContact.reset();
+                contactControllerTD.setPaneVisibility(false);
+            }
+        });
+
+
+                /*
+        editingContact.contactChanged.addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
+                //ajouter le contact à l'arbre
+                newContact = editingContact;
+                System.out.println(selectedItem);
+                TreeItem<Object> treenewcontact = new TreeItem<Object>(newContact);
+                //int sizeofselecteditem = selectedItem.getChildren().size();
+                //System.out.println(sizeofselecteditem-1);
+                selectedItem.getChildren().add(treenewcontact);
+            }
+        });
+        */
+    }
+
+    public void grouplistListener(){
+        td3Model.getGroups().addListener(new ListChangeListener<Group>() {
+            @Override
+            public void onChanged(Change<? extends Group> change) {
+                while(change.next()){
+                    if(change.wasAdded()){
+                        for(Group p : change.getAddedSubList()){
+                            //ajouter le groupe au selected item
+                            //parent.getChildren().add(new TreeItem<Object>(obj,new ImageView()))
+                            TreeItem<Object> newItem = new TreeItem<Object>(p);
+                            tree.getRoot().getChildren().add(newItem);
+                            //p.getListContact().addListener(contactListener);
+                        }
+                    }
+                    if(change.wasRemoved()){
+                        for (Group p : change.getRemoved()){
+
+                        }
+                    }
+                }
+            }
+        });
+        //contactlistener -> change {
+            //change.getelementadded()
+
+        //}
+        }
+
+
 
     public TreeItem<Object> getSelectedItem(){
         return selectedItem;
@@ -231,9 +308,5 @@ public class TD3Controller {
             return getItem() == null ? "" : getItem().toString();
         }
     }
-
-
-
-
 }
 

@@ -119,7 +119,7 @@
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </padding>
                         <children>
-                            <Button alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#validate" prefHeight="25.0" prefWidth="63.0" text="Valider" />
+                            <Button  alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#validate" prefHeight="25.0" prefWidth="63.0" text="Valider" />
                         </children>
                     </HBox>
                 </children>
