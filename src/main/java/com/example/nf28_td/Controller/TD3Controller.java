@@ -27,12 +27,15 @@ public class TD3Controller {
     private ContactControl contactControl;
     public Contact editingContact;
     private Contact newContact;
+    private Contact originalContact;
     public Group newGroup;
     public TD3Model td3Model;
     public ListChangeListener<Group> listChangeListener;
     public TreeItem<Object> selectedItem;
     private Group groupToAddContact; //groupe dans lequel on va ajouter un contact
     //private final Image groupIcon = new Image(getClass().getResourceAsStream("group.png")); //Imput stream must not be null
+
+    private int addOrModifyContact; // 0 = add, 1 = modify
 
     @FXML
     private BorderPane TD3BorderPane;
@@ -85,7 +88,6 @@ public class TD3Controller {
         grouplistListener();
         editContactListener();
     }
-
 
     public void ajouter(){
         System.out.println("ajouter");
@@ -141,12 +143,22 @@ public class TD3Controller {
             Object g = selectedItem.getValue();
             System.out.println(g);
             if (g instanceof Contact){
+                System.out.println("edition contact");
+                addOrModifyContact = 1;// mode édition
                 //mode édition cloner contact copier le contact
-                //addButton.setDisable(true); // true : desactive, false: active
+                //récupération du contact sélectionné
+                Contact buf = (Contact) g;
+                originalContact = buf.clone(); //clonage du contact original
+                editingContact.copyContact(buf);
+                contactControllerTD.setPaneVisibility(true);
             }else if(g instanceof Group){
+                addOrModifyContact = 0;
+                //réinitialisation des champs
+                contactControllerTD.editingContact.resetContact();
                 //addButton.setDisable(true);
                 contactControllerTD.setPaneVisibility(true);
             }else{
+                addOrModifyContact = 0;
                 System.out.print("je suis dans la racine \n");
                 //addButton.setDisable(false); // true : desactive, false: active
                 contactControllerTD.setPaneVisibility(false);
@@ -170,11 +182,29 @@ public class TD3Controller {
                 Contact contactval = editingContact.clone();
                 //vérifier qu'on est dans le bon groupe
                 for(Group grp : td3Model.getGroups()){
-                    if(grp == (Group) selectedItem.getValue()){
-                        System.out.println("ditcontactlistener");
-                        grp.addContact(contactval);
-                        System.out.println(grp.getListContact().toString());
-                    }
+                    if(grp == (Group) getGroupFromSelectedItem().getValue()){
+                        //mode ajout
+                        if(addOrModifyContact != 1){
+                            //ajout d'un contact
+                            //System.out.println("ditcontactlistener");
+                            grp.addContact(contactval);
+                            //System.out.println(grp.getListContact().toString());
+                        }else{
+                            //edition d'un contact
+                            for(Contact c : grp.getListContact()){
+                                System.out.println(originalContact);
+                                System.out.println(c);
+                                if(c.Equals(originalContact)){
+
+                                    c.updateContact(editingContact);
+                                    tree.refresh();
+                                }
+                            }
+                        }
+
+
+
+                        }
                     /*
                     * edition
                         for(contact ct : grp.getcontacts(){
