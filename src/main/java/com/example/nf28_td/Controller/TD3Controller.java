@@ -17,8 +17,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.collections.FXCollections;
+import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -201,9 +203,6 @@ public class TD3Controller {
                                 }
                             }
                         }
-
-
-
                         }
                     /*
                     * edition
@@ -271,6 +270,33 @@ public class TD3Controller {
 
     public void addContactToGroup(Contact contactToAdd){
         td3Model.addContactToGroup(contactToAdd, groupToAddContact);
+    }
+
+    public void importFile(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(new File("").getAbsolutePath()));
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            td3Model.load(file);
+        }
+    }
+
+    public void saveFileUnder(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(new File("").getAbsolutePath()));
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            System.out.println("savefileunder");
+            td3Model.save(file);
+        }
+    }
+
+    public void saveFile(){
+        System.out.println("saveFile");
+        if (td3Model != null) {
+            File file = new File("default.json");
+            td3Model.save(file);
+        }
     }
 
     private static class TextFieldTreeCellImpl extends TreeCell<Object> {

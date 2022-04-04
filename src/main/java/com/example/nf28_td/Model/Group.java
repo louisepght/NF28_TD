@@ -24,7 +24,7 @@ public class Group {
         return name;
     }
     public String getName(){
-        return name.getValue();
+        return name.get();
     }
     public void setName(String s){
         name.setValue(s);
