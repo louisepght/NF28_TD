@@ -2,6 +2,7 @@ package com.example.nf28_td.Controller;
 
 import com.example.nf28_td.ContactControl;
 import com.example.nf28_td.HelloApplication;
+import com.example.nf28_td.Model.Constant;
 import com.example.nf28_td.Model.Contact;
 import com.example.nf28_td.Model.Group;
 import com.example.nf28_td.Model.TD3Model;
@@ -36,6 +37,9 @@ public class TD3Controller {
     public TreeItem<Object> selectedItem;
     private Group groupToAddContact; //groupe dans lequel on va ajouter un contact
     //private final Image groupIcon = new Image(getClass().getResourceAsStream("group.png")); //Imput stream must not be null
+
+    //private final Image groupIcon = new Image(getClass().getResourceAsStream(Constant.IMAGES + "group.png"), 16, 16, true, true);
+    //private final Image contactIcon = new Image(getClass().getResourceAsStream(Constant.IMAGES + "contact.png"),16, 16, true, true);
 
     private int addOrModifyContact; // 0 = add, 1 = modify
 
@@ -89,6 +93,7 @@ public class TD3Controller {
         treeListener();
         grouplistListener();
         editContactListener();
+        errorListener();
     }
 
     public void ajouter(){
@@ -297,6 +302,24 @@ public class TD3Controller {
             File file = new File("default.json");
             td3Model.save(file);
         }
+    }
+
+    public void ErrorHandler(){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Problème");
+        alert.setContentText(td3Model.getError().getValue());
+        alert.showAndWait();
+        td3Model.getError().set("");
+    }
+
+    public void errorListener(){
+        td3Model.getError().addListener((obs,oldval,newval)-> {
+            if(newval!=null){
+                if(newval!=""){
+                    ErrorHandler();
+                }
+            }
+        });
     }
 
     private static class TextFieldTreeCellImpl extends TreeCell<Object> {

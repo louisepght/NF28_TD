@@ -6,4 +6,5 @@ public class Constant {
     public static String RESOURCE_FOLDER = "./resources";
     public static int WIDTH = 1000;
     public static int HEIGHT = 500;
+    public static String IMAGES = "../Images/";
 }

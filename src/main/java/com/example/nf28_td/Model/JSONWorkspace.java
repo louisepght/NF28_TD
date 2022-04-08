@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JSONWorkspace {
@@ -26,6 +28,10 @@ public class JSONWorkspace {
         jsonGroupsList = groupList;
     }
 
+    public List<Group> getJsonGroupsListAsSimplelist(){
+        return jsonGroupsList.stream().toList();
+    }
+
     //sauvegarde l'objet workspace dans un fichier
     public void save(File f) throws IOException {
         System.out.println(jsonGroupsList);
@@ -33,6 +39,14 @@ public class JSONWorkspace {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(f,jsonGroupsList);
         System.out.println("jsonworkspaces.save");
+    }
+
+
+
+    //assigner les groupes à partir d'une liste observable
+    public void setGroups(ObservableList<Group> grps){
+        System.out.println(grps);
+        jsonGroupsList = grps;
     }
 
     //groupes lus à partir d'un fichier
@@ -53,9 +67,14 @@ public class JSONWorkspace {
     }
     */
 
-    //assigner les groupes à partir d'une liste observable
-    public void setGroups(ObservableList<Group> grps){
-        System.out.println(grps);
-        jsonGroupsList = grps;
-    }
+    public ObservableList<Group> fromFile(File file) throws Exception{
+        System.out.println("fromFile");
+        ObservableList<Group> groups = FXCollections.observableArrayList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JSONWorkspace jsonWorkspace = null;
+        jsonWorkspace = objectMapper.readValue(new FileReader(file),JSONWorkspace.class);
+        groups = jsonWorkspace.getJsonGroupsList();
+        return groups;
+        }
+
 }
